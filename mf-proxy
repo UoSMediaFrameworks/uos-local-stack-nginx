@@ -1,0 +1,63 @@
+
+# Asset store proxy of web services
+server {
+	listen 80;
+	server_name uos-assetstore-64.azurewebsites.net;
+
+	location / {
+		proxy_pass http://127.0.0.1:4000;
+	}
+
+}
+
+# Web socket proxy for all hub communication
+server {
+	listen 80;
+	server_name uos-mediahub.azurewebsites.net;
+
+	location / {
+		proxy_pass http://127.0.0.1:3000;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	}
+}
+
+# Proxy for the basic development server serving the react framework
+server {
+	listen 80;
+	server_name mediaframework.salford.ac.uk;
+
+	location / {
+		proxy_pass http://127.0.0.1:5000;
+	}
+}
+
+# Graph static resources
+server {
+	listen 80;
+	server_name uos-mediahubgraph.azurewebsites.net;
+	root /var/uos-media-hub-graph-legacy;
+	location / {
+
+	}
+}
+
+# APEP CDN support
+server {
+	listen 80;
+	server_name mediaframework.cdn;
+	root /var/cdn;
+	add_header Access-Control-Allow-Origin "*";
+	add_header 'Access-Control-Allow-Headers' "*";
+	location / {
+		if ($request_method = OPTIONS ) {
+			add_header Access-Control-Allow-Origin "*";
+			add_header Access-Control-Allow-Methods "GET, OPTIONS";
+			add_header Access-Control-Allow-Headers "Range";
+			add_header Content-Length 0;
+			add_header Content-Type text/plain;
+			return 200;
+		}
+	}
+}
